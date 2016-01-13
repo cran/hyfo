@@ -5,11 +5,10 @@
 \title{Write to NetCDF file using hyfo list file}
 \usage{
 writeNcdf(gridData, filePath, missingValue = 1e+20, tz = "GMT",
-  units = NULL)
+  units = NULL, version = 3)
 }
 \arguments{
-\item{gridData}{A hyfo list file or the list file from \code{loadECOMS{ecomsUDG.Raccess}}
-or \code{loadGridData{ecomsUDG.Raccess}}}
+\item{gridData}{A hyfo list file from \code{\link{loadNcdf}}}
 
 \item{filePath}{A path of the new NetCDF file, should end with ".nc"}
 
@@ -23,6 +22,8 @@ you can assign it in the argument. If \code{tz = ''}, current time zone will be 
 \item{units}{A string showing in which unit you are putting in the NetCDF file, it can be
 seconds or days and so on. If not specified, the function will pick up the possible largest
 time units from \code{c('weeks', 'days', 'hours', 'mins', 'secs')}}
+
+\item{version}{ncdf file versions, default is 3, if 4 is chosen, output file will be foreced to version 4.}
 }
 \value{
 An NetCDF version 3 file.
@@ -48,8 +49,9 @@ writeNcdf(nc, 'test.nc')
 }
 \references{
 \itemize{
-\item #' David Pierce (2014). ncdf: Interface to Unidata netCDF data files. R package version 1.6.8.
-http://CRAN.R-project.org/package=ncdf
+\item David Pierce (2015). ncdf4: Interface to Unidata netCDF (Version 4 or
+Earlier) Format Data Files. R package version 1.14.1.
+http://CRAN.R-project.org/package=ncdf4
 
 \item Santander MetGroup (2015). ecomsUDG.Raccess: R interface to the ECOMS User Data Gateway. R package
 version 2.2-6. http://meteo.unican.es/ecoms-udg

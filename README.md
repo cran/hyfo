@@ -1,6 +1,22 @@
 # hyfo
 [![Travis-CI Build Status](https://travis-ci.org/Yuanchao-Xu/hyfo.svg?branch=master)](https://travis-ci.org/Yuanchao-Xu/hyfo)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/hyfo)](http://cran.r-project.org/package=hyfo)
 
+## Installation
+
+Released version from CRAN, for beginners and normal users:
+
+```R
+install.packages("hyfo")
+```
+
+Development version from github, for experienced users and those who are interested in investigating:
+
+```R
+install.packages("devtools")
+# You can ignore the line above, if you have already installed devtools
+devtools::install_github("Yuanchao-Xu/hyfo")
+```
 
 **Official Website is [http://yuanchao-xu.github.io/hyfo](http://yuanchao-xu.github.io/hyfo)**
 

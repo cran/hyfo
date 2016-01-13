@@ -14,19 +14,20 @@
 #' 
 #' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
 #' 
-#' @import ncdf
+#' @import ncdf4
 #' @references 
 #' 
 #' \itemize{
-#' \item David Pierce (2014). ncdf: Interface to Unidata netCDF data files. R package version 1.6.8.
-#' http://CRAN.R-project.org/package=ncdf
+#' \item David Pierce (2015). ncdf4: Interface to Unidata netCDF (Version 4 or
+#' Earlier) Format Data Files. R package version 1.14.1.
+#' http://CRAN.R-project.org/package=ncdf4
 #' }
 #' 
 #' 
 #' 
 #' @export
 getNcdfVar <- function(filePath) {
-  nc <- open.ncdf(filePath)
+  nc <- nc_open(filePath)
   names <- names(nc$var)
   return(names)
 }
@@ -39,6 +40,10 @@ getNcdfVar <- function(filePath) {
 #' get the basic information about the variables and select the target.
 #' @param tz A string representing the time zone, default is GMT, if you know what time zone is 
 #' you can assign it in the argument. If \code{tz = ''}, current time zone will be taken.
+# @param drop When the time dimension only have one value, the output data will drop
+# this dimension automatically (\code{drop = TRUE}), default value is \code{drop = FALSE}, then time dimension will be added.
+# This argument mainly applies to the later calculations based on hyfo file. If the dimension
+# is dropped, than some calculations may not be processed afterwards. 
 #' @param ... Several arguments including Year, month, lon, lat 
 #' type in \code{?downscaleNcdf} for details.You can load while downscale, 
 #' and also first load than use \code{downscaleNcdf} to downscale.
@@ -61,12 +66,13 @@ getNcdfVar <- function(filePath) {
 #' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
 #' 
 #' @export
-#' @import ncdf
+#' @import ncdf4
 #' @references 
 #' 
 #' \itemize{
-#' \item David Pierce (2014). ncdf: Interface to Unidata netCDF data files. R package version 1.6.8.
-#' http://CRAN.R-project.org/package=ncdf
+#' \item David Pierce (2015). ncdf4: Interface to Unidata netCDF (Version 4 or
+#' Earlier) Format Data Files. R package version 1.14.1.
+#' http://CRAN.R-project.org/package=ncdf4
 #' 
 #' \item Santander MetGroup (2015). ecomsUDG.Raccess: R interface to the ECOMS User Data Gateway. R package
 #' version 2.2-6. http://meteo.unican.es/ecoms-udg
@@ -74,7 +80,7 @@ getNcdfVar <- function(filePath) {
 #' 
 #' 
 loadNcdf <- function(filePath, varname, tz = 'GMT', ...) {
-  nc <- open.ncdf(filePath)
+  nc <- nc_open(filePath)
   
   var <- nc$var
   # Use name to locate the variable
@@ -84,20 +90,24 @@ loadNcdf <- function(filePath, varname, tz = 'GMT', ...) {
   var <- eval(call_1)
   if(is.null(var)) stop('No such variable name, check source file.')
   
-  # First needs to identify the variable name, load the right data
-  message('Loading data...')
-  nc_data <- get.var.ncdf(nc, var)
-  message('Processing...')
-  
   dimNames <- unlist(lapply(1:length(var$dim), function(x) var$dim[[x]]$name))
   
   # Only deals with the most common dimensions, futher dimensions will be added in future.
-  dimIndex <- match(c('lon', 'lat', 'time', 'member'), dimNames)
+  dimIndex <- grepAndMatch(c('lon', 'lat', 'time', 'member'), dimNames)
+  if (length(dimIndex) < 3) stop('Your file has less than 3 dimensions.')
+  
+  # First needs to identify the variable name, load the right data
+  message('Loading data...')
+  nc_data <- ncvar_get(nc, var)
+  message('Processing...')
   
   gridData <- list()
   gridData$Variable$varName <- varname
   gridData$xyCoords$x <- var$dim[[dimIndex[1]]]$vals
+  attributes(gridData$xyCoords$x)$name <- dimNames[dimIndex[1]]
+  
   gridData$xyCoords$y <- var$dim[[dimIndex[2]]]$vals
+  attributes(gridData$xyCoords$y)$name <- dimNames[dimIndex[2]]
   
   # Time part needs to be taken seperately
   
@@ -122,10 +132,9 @@ loadNcdf <- function(filePath, varname, tz = 'GMT', ...) {
 #   }
   Date <- timeSince + timeDiff
   
-  if (length(Date) == 1) {
-    warning("Only one time step is taken, time dimension is dropped in the original data.
-            But after loading, the time dimension (with length : 1) will be added.")
-  }
+  # data directly loaded from ncdf4 will drop the dimension with only one value.
+  # the varsize shows the real dimension, without any dropping.
+  dim(nc_data) <- var$varsize 
   
   # Right now there is no need to add end Date, in furture, may be added as needed.
   gridData$Dates$start <- as.character(Date)
@@ -133,17 +142,14 @@ loadNcdf <- function(filePath, varname, tz = 'GMT', ...) {
   # Assing data to grid data
   # At leaset should be 3 dimensions, lon, lat, time. So if less than 3, 
   
-  if (length(dim(nc_data)) < 3) {
-    dim(nc_data) <- c(dim(nc_data), 1) 
-    message('Time dimension is added, make sure in your original data, only time dimension was dropped.')
-  }
   gridData$Data <- nc_data
+  
   attributes(gridData$Data)$dimensions <- dimNames
   
   if (!is.na(dimIndex[4])) gridData$Members <- var$dim[[dimIndex[4]]]$vals
   
   gridData$Loaded <- 'by hyfo package, http://yuanchao-xu.github.io/hyfo/'
-  close.ncdf(nc)
+  nc_close(nc)
   
   output <- downscaleNcdf(gridData, ...)
   
@@ -155,8 +161,7 @@ loadNcdf <- function(filePath, varname, tz = 'GMT', ...) {
 
 
 #' Downscale NetCDF file
-#' @param gridData A hyfo list file or the list file from \code{loadECOMS{ecomsUDG.Raccess}}
-#'  or \code{loadGridData{ecomsUDG.Raccess}}
+#' @param gridData A hyfo list file from \code{\link{loadNcdf}}
 #' @param year A vector of the target year. e.g. \code{year = 2000}, \code{year = 1980:2000}
 #' @param month A vector of the target month. e.g. \code{month = 2}, \code{month = 3:12}
 #' @param lon A vector of the range of the downscaled longitude, should contain a max value
@@ -185,8 +190,6 @@ loadNcdf <- function(filePath, varname, tz = 'GMT', ...) {
 #' @references 
 #' 
 #' \itemize{
-#' \item David Pierce (2014). ncdf: Interface to Unidata netCDF data files. R package version 1.6.8.
-#' http://CRAN.R-project.org/package=ncdf
 #' 
 #' \item Santander MetGroup (2015). ecomsUDG.Raccess: R interface to the ECOMS User Data Gateway. R package
 #' version 2.2-6. http://meteo.unican.es/ecoms-udg
@@ -276,7 +279,7 @@ downscaleNcdf <- function(gridData, year = NULL, month = NULL, lon = NULL, lat =
     if (length(targetLonIndex) == 0) stop('Your input lon is too small, try to expand the 
                                           longitude range.') 
     gridData$xyCoords$x <- gridData$xyCoords$x[targetLonIndex]
-    lonDim <- match('lon', attributes(gridData$Data)$dimensions)
+    lonDim <- grepAndMatch('lon', attributes(gridData$Data)$dimensions)
     
     gridData$Data <- chooseDim(gridData$Data, lonDim, targetLonIndex)
   }
@@ -293,7 +296,7 @@ downscaleNcdf <- function(gridData, year = NULL, month = NULL, lon = NULL, lat =
     if (length(targetLonIndex) == 0) stop('Your input lat is too small, try to expand the 
                                           latitude range.') 
     gridData$xyCoords$y <- gridData$xyCoords$y[targetLatIndex]
-    latDim <- match('lat', attributes(gridData$Data)$dimensions)
+    latDim <- grepAndMatch('lat', attributes(gridData$Data)$dimensions)
     gridData$Data <- chooseDim(gridData$Data, latDim, targetLatIndex)
   }
   
@@ -311,8 +314,7 @@ downscaleNcdf <- function(gridData, year = NULL, month = NULL, lon = NULL, lat =
 
 
 #' Write to NetCDF file using hyfo list file
-#' @param gridData A hyfo list file or the list file from \code{loadECOMS{ecomsUDG.Raccess}}
-#'  or \code{loadGridData{ecomsUDG.Raccess}}
+#' @param gridData A hyfo list file from \code{\link{loadNcdf}}
 #' @param filePath A path of the new NetCDF file, should end with ".nc"
 #' @param missingValue A number representing the missing value in the NetCDF file, default
 #' is 1e20
@@ -321,6 +323,7 @@ downscaleNcdf <- function(gridData, year = NULL, month = NULL, lon = NULL, lat =
 #' @param units A string showing in which unit you are putting in the NetCDF file, it can be 
 #' seconds or days and so on. If not specified, the function will pick up the possible largest 
 #' time units from \code{c('weeks', 'days', 'hours', 'mins', 'secs')}
+#' @param version ncdf file versions, default is 3, if 4 is chosen, output file will be foreced to version 4.
 #' @return An NetCDF version 3 file.
 #' @examples 
 #' # First open the test NETcDF file.
@@ -339,12 +342,13 @@ downscaleNcdf <- function(gridData, year = NULL, month = NULL, lon = NULL, lat =
 #' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
 #' 
 #' @export 
-#' @import ncdf
+#' @import ncdf4
 #' @references 
 #' 
 #' \itemize{
-#' \item #' David Pierce (2014). ncdf: Interface to Unidata netCDF data files. R package version 1.6.8.
-#' http://CRAN.R-project.org/package=ncdf
+#' \item David Pierce (2015). ncdf4: Interface to Unidata netCDF (Version 4 or
+#' Earlier) Format Data Files. R package version 1.14.1.
+#' http://CRAN.R-project.org/package=ncdf4
 #' 
 #' \item Santander MetGroup (2015). ecomsUDG.Raccess: R interface to the ECOMS User Data Gateway. R package
 #' version 2.2-6. http://meteo.unican.es/ecoms-udg
@@ -352,15 +356,17 @@ downscaleNcdf <- function(gridData, year = NULL, month = NULL, lon = NULL, lat =
 #' }
 #' 
 #' 
-writeNcdf <- function(gridData, filePath, missingValue = 1e20, tz = 'GMT', units = NULL) {
+writeNcdf <- function(gridData, filePath, missingValue = 1e20, tz = 'GMT', units = NULL, version = 3) {
   
   name <- gridData$Variable$varName
   # First defines dimensions.
-  dimLon <- dim.def.ncdf('lon', 'degree', gridData$xyCoords$x)
-  dimLat <- dim.def.ncdf('lat', 'degree', gridData$xyCoords$y)
+  lonName <- attributes(gridData$xyCoords$x)$name
+  latName <- attributes(gridData$xyCoords$y)$name
+  dimLon <- ncdim_def(lonName, 'degree', gridData$xyCoords$x)
+  dimLat <- ncdim_def(latName, 'degree', gridData$xyCoords$y)
   dimMem <- NULL
   if (!is.null(gridData$Members)) {
-    dimMem <- dim.def.ncdf('member', 'members', 1:length(gridData$Members))
+    dimMem <- ncdim_def('member', 'members', 1:length(gridData$Members))
   }
   
   
@@ -373,45 +379,66 @@ writeNcdf <- function(gridData, filePath, missingValue = 1e20, tz = 'GMT', units
     time <- difftime(dates, dates[1], units = units)
   }
   timeUnits <- paste(units, 'since', dates[1])
-  dimTime <- dim.def.ncdf('time', timeUnits, time)
+  # Here time needs to be numeric, as required by ncdf4 package, which is not the same
+  # with ncdf
+  dimTime <- ncdim_def('time', timeUnits, as.numeric(time))
   
   
   # Depending on whether there is a member part of the dataset.
-  
+  # default list
   dimList <- list(dimLon, dimLat, dimTime, dimMem)
+  
+  # In order to keep the dim list exactly the same with the original one, it needs to be changed.
+  dimIndex <- grepAndMatch(c('lon', 'lat', 'time', 'member'), attributes(gridData$Data)$dimensions)
+  dimIndex <- na.omit(dimIndex)
+  
+  # Here order is needed, cuz in the procesure above, c('lon', 'lat', 'time', 'member')
+  # is the pattern, while actually, attributes(gridData$Data)$dimensions should be the pattern.
+  # So here needs an order() to get the wanted result.
+  dimList <- dimList[order(dimIndex)]
+  
   # delete the NULL list, in order that there is no member part in the data.
   dimList <- Filter(Negate(is.null), dimList)
   # Then difines data
-  var <- var.def.ncdf( name, "units", dimList, missingValue)
+  var <- ncvar_def( name, "units", dimList, missingValue)
   
-  nc <- create.ncdf(filePath, var)
+  
+  # Here for ncdf4, there is an option to create version 4 ncdf, in future, it
+  # may added here.
+  if (version == 3) {
+    nc <- nc_create(filePath, var) 
+  } else if (version == 4) {
+    nc <- nc_create(filePath, var, force_v4 = TRUE)
+  } else {
+    stop("Which ncdf version you want? Only 3 and 4 can be selected!")
+  }
   
   # This part comes from the library downscaleR, can be deleted if you don't 
   # use {ecomsUDG.Raccess}, by adding this, the file can be read by the package {ecomsUDG.Raccess}
-  att.put.ncdf(nc, "time", "standard_name","time")
-  att.put.ncdf(nc, "time", "axis","T")
-  att.put.ncdf(nc, "time", "_CoordinateAxisType","Time")
-  #att.put.ncdf(nc, "time", "_ChunkSize",1)
-  att.put.ncdf(nc, "lon", "standard_name","longitude")
-  att.put.ncdf(nc, "lon", "_CoordinateAxisType","Lon")
-  att.put.ncdf(nc, "lat", "standard_name","latitude")
-  att.put.ncdf(nc, "lat", "_CoordinateAxisType","Lat")
+  ncatt_put(nc, "time", "standard_name","time")
+  ncatt_put(nc, "time", "axis","T")
+  ncatt_put(nc, "time", "_CoordinateAxisType","Time")
+  #ncatt_put(nc, "time", "_ChunkSize",1)
+  ncatt_put(nc, lonName, "standard_name","longitude")
+  ncatt_put(nc, lonName, "_CoordinateAxisType","Lon")
+  ncatt_put(nc, latName, "standard_name","latitude")
+  ncatt_put(nc, latName, "_CoordinateAxisType","Lat")
   if (!is.null(dimMem)){
-    att.put.ncdf(nc, "member", "standard_name","realization")
-    att.put.ncdf(nc, "member", "_CoordinateAxisType","Ensemble")
+    ncatt_put(nc, "member", "standard_name","realization")
+    ncatt_put(nc, "member", "_CoordinateAxisType","Ensemble")
     #att.put.ncdf(nc, "member", "ref","http://www.uncertml.org/samples/realisation")
   }
   
   
   # This part has to be put
-  att.put.ncdf(nc, 0, "Conventions","CF-1.4")
-  att.put.ncdf(nc, 0, 'WrittenBy', 'hyfo(http://yuanchao-xu.github.io/hyfo/)')
+  ncatt_put(nc, 0, "Conventions","CF-1.4")
+  ncatt_put(nc, 0, 'WrittenBy', 'hyfo(http://yuanchao-xu.github.io/hyfo/)')
   
-  dimIndex <- match(c('lon', 'lat', 'time', 'member'), attributes(gridData$Data)$dimensions)
-  dimIndex <- na.omit(dimIndex)
-  data <- aperm(gridData$Data, dimIndex)
-  put.var.ncdf(nc, name, data)
-  close.ncdf(nc)
+  #data <- aperm(gridData$Data, dimIndex) no need to do this, in the process above
+  # when you define the dimlist, the order of the dimension was fixed.
+  data <- gridData$Data
+  ncvar_put(nc, name, data)
+  nc_close(nc)
   
 }
 
@@ -432,7 +459,7 @@ getTimeUnit <- function(dates) {
 
 
 # Save for future use. 
-#' @import ncdf
+#' @import ncdf4
 #' @references 
 #' David Pierce (2014). ncdf: Interface to Unidata netCDF data files. R package version 1.6.8.
 #' http://CRAN.R-project.org/package=ncdf
@@ -440,4 +467,14 @@ getExtralDim <- function(...) {
   dimList <- list(...)
   
   
+}
+
+# in order to first grep than match.
+# match only provides for exactly match, 
+# dimIndex <- grepAndMatch(c('lon', 'lat', 'time', 'member'), dimNames)
+grepAndMatch <- function(x, table) {
+  index <- unlist(lapply(x, function(x) {
+    a <- grep(x, table)
+  }))
+  return(index)
 }
