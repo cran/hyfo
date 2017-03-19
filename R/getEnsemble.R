@@ -98,7 +98,7 @@
 #' b <- getHisEnsem(a, example = c('1994-2-4', '1996-1-4'), interval = 210, buffer = 30)
 #' 
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' 
 #' @importFrom reshape2 melt 
@@ -330,7 +330,7 @@ getHisEnsem <- function (TS, example, interval = 365, buffer = 0, plot = 'norm',
 #' b <- getFrcEnsem(nc, coord = c(-1.4, 43.2))
 #' 
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @return A ensemble time series extracted from forecating data.
 #' 
@@ -481,11 +481,12 @@ getFrcEnsem <- function(dataset, cell = 'mean', plot = 'norm', output = 'data', 
 #' getEnsem_comb(b1, b2)
 #' getEnsem_comb(list = list(b1, b2), nrow = 2)
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' 
 #' @export
 #' @import ggplot2
+#' @importFrom data.table rbindlist
 #' @references 
 #' 
 #' \itemize{
@@ -503,15 +504,15 @@ getEnsem_comb <- function(..., list = NULL, nrow = 1, legend = TRUE, x = '', y =
   
   if (!is.null(list)) {
     checkBind(list, 'rbind')
-    data_ggplot <- do.call('rbind', list)
+    data_ggplot <- rbindlist(list)
   } else {
     plots <- list(...)
     checkBind(plots, 'rbind')
-    data_ggplot <- do.call('rbind', plots)
+    data_ggplot <- rbindlist(plots)
   }  
   #data_ggplot$name <- factor(data_ggplot$name, levels = data_ggplot$name, ordered = TRUE)
   
-  if (!class(data_ggplot) == 'data.frame') {
+  if (!class(data_ggplot)[1] == 'data.table') {
     warning('Your input is probably a list, but you forget to add "list = " before it.
             Try again, or check help for more information.')
   } else if (is.null(data_ggplot$name)) {

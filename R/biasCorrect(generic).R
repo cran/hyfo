@@ -75,7 +75,7 @@
 #'  (e.g. precipitation, wind speed, etc.) because values out of the variable range could be obtained 
 #'  (e.g. negative wind speeds...)
 #'  
-#'  \strong{scaling}
+#' \strong{scaling}
 #'  
 #' This method consists on scaling the simulation  with the difference (additive) or quotient (multiplicative) 
 #' between the observed and simulated means in the train period. The \code{additive} or \code{multiplicative}
@@ -183,7 +183,7 @@
 #'
 #'
 #'
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' 
 #' @references 
@@ -212,14 +212,18 @@ setGeneric('biasCorrect', function(frc, hindcast, obs, method = 'scaling', scale
   standardGeneric('biasCorrect')
 })
 
-#' @describeIn biasCorrect
+
+# Since in new version of roxygen2, describeIn was changed, https://stackoverflow.com/questions/24246594/automatically-document-all-methods-of-an-s4-generic-using-roxygen2
+# so use rdname instead
+#' @rdname biasCorrect
+#' 
 setMethod('biasCorrect', signature('data.frame', 'data.frame', 'data.frame'),
           function(frc, hindcast, obs, method, scaleType, preci, prThreshold, extrapolate) {
             result <- biasCorrect.TS(frc, hindcast, obs, method, scaleType, preci, prThreshold, extrapolate)
             return(result)
           })
 
-#' @describeIn biasCorrect
+#' @rdname biasCorrect
 setMethod('biasCorrect', signature('list', 'list', 'list'), 
           function(frc, hindcast, obs, method, scaleType, preci, prThreshold, extrapolate) {
             result <- biasCorrect.list(frc, hindcast, obs, method, scaleType, preci, prThreshold, extrapolate)

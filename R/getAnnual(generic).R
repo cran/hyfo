@@ -33,7 +33,7 @@
 #' getAnnual(a3)
 #' 
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @export
 #' @importFrom methods setGeneric
@@ -44,7 +44,7 @@
 #' \item Hadley Wickham (2007). Reshaping Data with the reshape Package. Journal of Statistical Software,
 #' 21(12), 1-20. URL http://www.jstatsoft.org/v21/i12/.
 #' \item R Core Team (2015). R: A language and environment for statistical computing. R Foundation for
-#' Statistical Computing, Vienna, Austria. URL http://www.R-project.org/.
+#' Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
 #' }
 #' 
 #' 
@@ -53,7 +53,7 @@ setGeneric('getAnnual', function(data, output = 'series', minRecords = 355,
   standardGeneric('getAnnual')
 })
 
-#' @describeIn getAnnual
+#' @rdname getAnnual
 #' @importFrom methods setMethod
 setMethod('getAnnual', signature('data.frame'), 
           function(data, output, minRecords, ...) {
@@ -62,7 +62,7 @@ setMethod('getAnnual', signature('data.frame'),
             return(result)
 })
 
-#' @describeIn getAnnual
+#' @rdname getAnnual
 #' @importFrom methods setMethod
 setMethod('getAnnual', signature('list'),
           function(data, output, minRecords, ...) {
@@ -71,6 +71,7 @@ setMethod('getAnnual', signature('list'),
             return(result)
           })
 
+#' @importFrom data.table rbindlist
 getAnnual.TS <- function(dataframe) {
   Date <- as.POSIXlt(dataframe[, 1])
   # Calculate how many gauging stations.
@@ -82,7 +83,7 @@ getAnnual.TS <- function(dataframe) {
     getAnnual_dataframe(dataframe_new)
   })
   
-  data <- do.call('rbind', data)
+  data <- rbindlist(data)
   #  After rbind, factor level has to be reassigned in order to be well plotted.
   data$Year <- factor(data$Year, levels = sort(unique(data$Year)), ordered = TRUE)
   rownames(data) <- NULL
@@ -91,9 +92,10 @@ getAnnual.TS <- function(dataframe) {
 }
 
 
+#' @importFrom data.table rbindlist
 getAnnual.list <- function(datalist) {
   data <- lapply(datalist, FUN = getAnnual_dataframe)
-  data <- do.call('rbind', data)
+  data <- rbindlist(data)
   #  After rbind, factor level has to be reassigned in order to be well plotted.
   data$Year <- factor(data$Year, levels = sort(unique(data$Year)), ordered = TRUE)
   rownames(data) <- NULL

@@ -55,7 +55,7 @@
 #' a <- getPreciBar(TS, method = 'spring', info = TRUE)
 #' 
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @references 
 #' 
@@ -65,7 +65,7 @@
 #' 21(12), 1-20. URL http://www.jstatsoft.org/v21/i12/.
 #' \item H. Wickham. ggplot2: elegant graphics for data analysis. Springer New York, 2009.
 #' \item R Core Team (2015). R: A language and environment for statistical computing. R Foundation for
-#' Statistical Computing, Vienna, Austria. URL http://www.R-project.org/.
+#' Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
 #' }
 #'
 #' 
@@ -77,7 +77,7 @@ setGeneric('getPreciBar', function(data, method, cell = 'mean', output = 'data',
   standardGeneric('getPreciBar')
 })
 
-#' @describeIn getPreciBar
+#' @rdname getPreciBar
 setMethod('getPreciBar', signature('list'), 
           function(data, method, cell, output, name, plotRange, member, omitNA, info, ...) {
             TS <- getPreciBar.list(data, cell, member)
@@ -91,7 +91,7 @@ setMethod('getPreciBar', signature('list'),
             return(result)
 })
 
-#' @describeIn getPreciBar
+#' @rdname getPreciBar
 setMethod('getPreciBar', signature('data.frame'), 
           function(data, method, cell, output, name, plotRange, member, omitNA, info, ...) {
             Date <- as.POSIXlt(TS[, 1])
@@ -403,10 +403,11 @@ getPreciBar.plot <- function(TS, method, output, name, plotRange, omitNA, info,
 #' 
 #' getPreciBar_comb(b1, b2)
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @export
 #' @import ggplot2
+#' @importFrom data.table rbindlist
 #' @references 
 #' 
 #' \itemize{
@@ -415,15 +416,15 @@ getPreciBar.plot <- function(TS, method, output, name, plotRange, omitNA, info,
 #' 
 getPreciBar_comb <- function(..., list = NULL, nrow = 1, x = '', y = '', title = '', output = FALSE) {
   if (!is.null(list)) {
-    data_ggplot <- do.call('rbind', list)
+    data_ggplot <- rbindlist(list)
   } else {
     
     bars <- list(...)
     checkBind(bars, 'rbind')
-    data_ggplot <- do.call('rbind', bars)
+    data_ggplot <- rbindlist(bars)
   }
   
-  if (!class(data_ggplot) == 'data.frame') {
+  if (!class(data_ggplot)[1] == 'data.table') {
     warning('Your input is probably a list, but you forget to add "list = " before it.
             Try again, or check help for more information.')
   } else if (is.null(data_ggplot$Name)) {

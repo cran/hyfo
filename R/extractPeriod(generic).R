@@ -76,14 +76,14 @@
 #' dataframe_new <- extractPeriod(dataframe, month = c(12,1,2), year = 1995)
 #' 
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @importFrom zoo as.Date
 #' @references 
 #' 
 #' \itemize{
 #' \item Achim Zeileis and Gabor Grothendieck (2005). zoo: S3 Infrastructure for Regular and Irregular Time
-#' Series. Journal of Statistical Software, 14(6), 1-27. URL http://www.jstatsoft.org/v14/i06/
+#' Series. Journal of Statistical Software, 14(6), 1-27. URL https://www.jstatsoft.org/v14/i06/
 #' }
 #'
 #' @export
@@ -93,7 +93,7 @@ setGeneric('extractPeriod', function(data, startDate = NULL, endDate = NULL, com
 })
 
 
-#' @describeIn extractPeriod
+#' @rdname extractPeriod
 #' @importFrom methods setMethod
 setMethod('extractPeriod', signature('data.frame'),
           function(data, startDate, endDate, commonPeriod, year, month) {
@@ -105,7 +105,7 @@ setMethod('extractPeriod', signature('data.frame'),
 })
 
 
-#' @describeIn extractPeriod
+#' @rdname extractPeriod
 #' @importFrom methods setMethod
 setMethod('extractPeriod', signature('list'),
           function(data, startDate, endDate, commonPeriod, year, month) {
@@ -115,7 +115,8 @@ setMethod('extractPeriod', signature('list'),
                                 month = month)
             } else if (is.null(startDate) & is.null(endDate) & commonPeriod == TRUE) {
               
-              Dates <- lapply(datalist, extractPeriod_getDate) 
+              Dates <- lapply(datalist, extractPeriod_getDate)
+              # Here don't know why rbindlist cannot work, change back to do.call
               Dates <- do.call('rbind', Dates)
               
               startDate <- as.Date(max(Dates[, 1]))
@@ -223,7 +224,7 @@ extractPeriod_dataframe <- function(dataframe, startDate, endDate, year = NULL, 
 #' 
 #' \itemize{
 #' \item R Core Team (2015). R: A language and environment for statistical computing. R Foundation for
-#' Statistical Computing, Vienna, Austria. URL http://www.R-project.org/.
+#' Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
 #' }
 #' 
 #' 

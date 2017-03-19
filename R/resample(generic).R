@@ -38,7 +38,7 @@
 #' nc_new <- resample(nc, 'day2mon')
 #' 
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @export
 #' @importFrom stats aggregate
@@ -46,7 +46,7 @@
 #' 
 #' \itemize{
 #' \item R Core Team (2015). R: A language and environment for statistical computing. R Foundation for
-#' Statistical Computing, Vienna, Austria. URL http://www.R-project.org/.
+#' Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
 #' }
 #' 
 setGeneric('resample', function(data, method) {
@@ -54,14 +54,14 @@ setGeneric('resample', function(data, method) {
 })
 
 
-#' @describeIn resample
+#' @rdname resample
 setMethod('resample', signature('data.frame'),
           function(data, method) {
             result <- resample.TS(data, method)
             return(result)
           })
 
-#' @describeIn resample
+#' @rdname resample
 setMethod('resample', signature('list'),
           function(data, method) {
             result <- resample.list(data, method)
@@ -71,6 +71,7 @@ setMethod('resample', signature('list'),
 
 
 #' @importFrom stats aggregate
+#' @importFrom data.table rbindlist
 resample.TS <- function(TS, method) {
   if (length(TS) != 2) {
     stop('Time series not correct, should be two columns, Date and value.')
@@ -84,7 +85,7 @@ resample.TS <- function(TS, method) {
     
     data <- apply(TS, MARGIN = 1 , FUN = mon2day)
     
-    output <- do.call('rbind', data)
+    output <- rbindlist(data)
   } else if (method == 'day2mon') {
     Date <- as.Date(TS[, 1])
     year <- format(Date, format = '%Y')
@@ -133,7 +134,7 @@ resample.list <- function(hyfo, method) {
 #' 
 #' \itemize{
 #' \item R Core Team (2015). R: A language and environment for statistical computing. R Foundation for
-#' Statistical Computing, Vienna, Austria. URL http://www.R-project.org/.
+#' Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
 #' }
 #' 
 mon2day <- function(monData) {

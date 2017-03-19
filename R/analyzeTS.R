@@ -9,6 +9,7 @@
 #' different outputs in the later multiplot using \code{plotTS_comb}.
 #' @param plot representing the plot type, there are two types, "norm" and "cum", "norm" gives an normal
 #' plot, and "cum" gives a cumulative plot. Default is "norm".
+#' @param showNA A boolean representing whether the NA values should be marked, default is TRUE.
 #' @param x label for x axis.
 #' @param y label for y axis.
 #' @param title plot title.
@@ -40,7 +41,7 @@
 #' # and compare them using plotTS_comb. If all data are in one plot, there might be too messy.
 #' 
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @references 
 #' \itemize{
@@ -50,8 +51,8 @@
 #' @import ggplot2
 #' @importFrom reshape2 melt
 #' @export
-plotTS <- function(..., type = 'line', output = 'data', plot = 'norm', name = NULL, x = NULL, 
-                   y = NULL, title = NULL, list = NULL) {
+plotTS <- function(..., type = 'line', output = 'data', plot = 'norm', name = NULL, showNA = TRUE, 
+                   x = NULL, y = NULL, title = NULL, list = NULL) {
   ## arrange input TS or TS list.
   if (is.null(list)) {
     list <- list(...)
@@ -142,12 +143,16 @@ plotTS <- function(..., type = 'line', output = 'data', plot = 'norm', name = NU
     stop("No such plot type.")
   }
   
+  if (showNA == TRUE) {
+    missingVLayer <- with(TS, {
+      geom_point(data = data_plot[NAIndex, ], group = 1, size = 3, shape = 4, color = 'black')
+    })
+    
+    mainLayer <- mainLayer + missingVLayer
+  }
   
-  missingVLayer <- with(TS, {
-    geom_point(data = data_plot[NAIndex, ], group = 1, size = 3, shape = 4, color = 'black')
-  })
   
-  plotLayer <- mainLayer + secondLayer + missingVLayer
+  plotLayer <- mainLayer + secondLayer
   
   print(plotLayer) 
   
@@ -191,7 +196,7 @@ plotTS <- function(..., type = 'line', output = 'data', plot = 'norm', name = NU
 #' plotTS_comb(a1, a2)
 #' plotTS_comb(list = list(a1, a2), y = 'y axis', nrow = 2)
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @references 
 #' \itemize{
@@ -199,6 +204,7 @@ plotTS <- function(..., type = 'line', output = 'data', plot = 'norm', name = NU
 #' }
 #' @export
 #' @import ggplot2
+#' @importFrom data.table rbindlist
 plotTS_comb <- function(..., nrow = 1, type = 'line', list = NULL, x = 'Date', y = '', title = '', 
                         output = FALSE){
   # In ploting the time series, since the data comes from outside of hyfo, 
@@ -208,15 +214,17 @@ plotTS_comb <- function(..., nrow = 1, type = 'line', list = NULL, x = 'Date', y
   
   if (!is.null(list)) {
     checkBind(list, 'rbind')
-    data_ggplot <- do.call('rbind', list)
+    #data_ggplot <- do.call('rbind', list)
+    data_ggplot <- rbindlist(list)
   } else {
     
     bars <- list(...)
     checkBind(bars, 'rbind')
-    data_ggplot <- do.call('rbind', bars)
+    #data_ggplot <- do.call('rbind', bars)
+    data_ggplot <- rbindlist(bars)
   }
   
-  if (!class(data_ggplot) == 'data.frame') {
+  if (!class(data_ggplot)[1] == 'data.table') {
     warning('Your input is probably a list, but you forget to add "list = " before it.
             Try again, or check help for more information.')
   } else if (is.null(data_ggplot$name)) {
@@ -270,14 +278,14 @@ plotTS_comb <- function(..., nrow = 1, type = 'line', list = NULL, x = 'Date', y
 #' dis <- seq(1, 100)
 #' getLMom(dis)
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @export
 #' @references 
 #' 
 #' \itemize{
 #' \item J. R. M. Hosking (2015). L-moments. R package, version 2.5. URL:
-#' http://CRAN.R-project.org/package=lmom.
+#' https://CRAN.R-project.org/package=lmom.
 #' }
 #' 
 #' 
@@ -304,17 +312,17 @@ getLMom <- function(dis){
 #' dis <- seq(1, 100)
 #' getMoment(dis)
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @export
 #' @references 
 #' 
 #' \itemize{
 #' \item Lukasz Komsta and Frederick Novomestky (2015). moments: Moments, cumulants, skewness, kurtosis and
-#' related tests. R package version 0.14. http://CRAN.R-project.org/package=moments
+#' related tests. R package version 0.14. https://CRAN.R-project.org/package=moments
 #' 
 #' \item R Core Team (2015). R: A language and environment for statistical computing. R Foundation for
-#' Statistical Computing, Vienna, Austria. URL http://www.R-project.org/.
+#' Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
 #' }
 #' 
 #' @importFrom moments skewness kurtosis

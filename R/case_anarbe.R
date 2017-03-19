@@ -12,26 +12,28 @@
 #' folder <- strsplit(file, '1999')[[1]][1]
 #' a <- collectData_csv_anarbe(folder)
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @references 
 #' 
 #' \itemize{
 #' \item http://meteo.navarra.es/estaciones/mapadeestaciones.cfm
 #' \item R Core Team (2015). R: A language and environment for statistical computing. R Foundation for
-#' Statistical Computing, Vienna, Austria. URL http://www.R-project.org/.
+#' Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
 #' }
 #' 
 #' @source http://meteo.navarra.es/estaciones/mapadeestaciones.cfm
 #' @export
 #' @importFrom utils tail
+#' @importFrom data.table rbindlist
 collectData_csv_anarbe <- function(folderName, output = TRUE){
   
   fileNames <- list.files(folderName, pattern='*.csv', full.names = TRUE)
   data <- lapply(fileNames, readColumn_csv_anarbe)
-  data <- do.call('rbind', data)
+  data <- rbindlist(data)
   data <- data[, 1:2]
-  data[, 1] <- as.Date(data[, 1], format = '%d/%m/%Y')
+  # cus the special structure of data.tables, here should be data[[1]], instead of data[, 1]
+  data[, 1] <- as.Date(data[[1]], format = '%d/%m/%Y')
   
   #newFileName <- file.choose(new = T)
   #write.table(data_new,file=newFileName,row.names = F, col.names = F,sep=',')
@@ -258,14 +260,14 @@ collectData_excel_anarbe <- function(folderName, keyword = NULL, output = TRUE){
 #' }
 #'
 #' 
-#' # More examples can be found in the user manual on http://yuanchao-xu.github.io/hyfo/
+#' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
 #' @references 
 #' 
 #' \itemize{
 #' \item http://www4.gipuzkoa.net/oohh/web/esp/02.asp
 #' \item R Core Team (2015). R: A language and environment for statistical computing. R Foundation for
-#' Statistical Computing, Vienna, Austria. URL http://www.R-project.org/.
+#' Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
 #' }
 #' 
 #' 
@@ -273,6 +275,7 @@ collectData_excel_anarbe <- function(folderName, keyword = NULL, output = TRUE){
 #' @return The collected data from different txt files.
 #' @export
 #' @importFrom utils tail
+#' @importFrom data.table rbindlist
 collectData_txt_anarbe <- function(folderName, output = TRUE, rangeWord = c('Ene       ', -1, 
                                                                             'Total     ', -6)){
   #All the code should be ASCII encode, so there should be no strange symbol.
@@ -294,7 +297,7 @@ collectData_txt_anarbe <- function(folderName, output = TRUE, rangeWord = c('Ene
   
   data <- lapply(fileNames, FUN = readColumn_txt_anarbe, rangeWord = rangeWord)
   
-  data <- do.call('rbind', data)
+  data <- rbindlist(data)
   
   a <- unlist(strsplit(folderName, '\\\\|/'))
   tarName <- tail(a, 2)[1]
@@ -350,7 +353,7 @@ anarbe_txt <- function(dataset, x1, x2){
 #' 
 #' \itemize{
 #' \item R Core Team (2015). R: A language and environment for statistical computing. R Foundation for
-#' Statistical Computing, Vienna, Austria. URL http://www.R-project.org/.
+#' Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
 #' }
 #' 
 #' @importFrom utils read.fwf
