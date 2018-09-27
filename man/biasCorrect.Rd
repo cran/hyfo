@@ -7,16 +7,17 @@
 \alias{biasCorrect,list,list,list-method}
 \title{Biascorrect the input timeseries or hyfo dataset}
 \usage{
-biasCorrect(frc, hindcast, obs, method = "scaling", scaleType = "multi",
-  preci = FALSE, prThreshold = 0, extrapolate = "no")
-
-\S4method{biasCorrect}{data.frame,data.frame,data.frame}(frc, hindcast, obs,
-  method = "scaling", scaleType = "multi", preci = FALSE,
-  prThreshold = 0, extrapolate = "no")
-
-\S4method{biasCorrect}{list,list,list}(frc, hindcast, obs, method = "scaling",
+biasCorrect(frc, hindcast, obs, method = "scaling",
   scaleType = "multi", preci = FALSE, prThreshold = 0,
   extrapolate = "no")
+
+\S4method{biasCorrect}{data.frame,data.frame,data.frame}(frc, hindcast,
+  obs, method = "scaling", scaleType = "multi", preci = FALSE,
+  prThreshold = 0, extrapolate = "no")
+
+\S4method{biasCorrect}{list,list,list}(frc, hindcast, obs,
+  method = "scaling", scaleType = "multi", preci = FALSE,
+  prThreshold = 0, extrapolate = "no")
 }
 \arguments{
 \item{frc}{a hyfo grid data output or a dataframe (time series) consists of Date column and one or more value columns, 
@@ -39,7 +40,9 @@ details. Default scaleType is 'multi'.}
 precipitation, some biascorrect methods may not apply to, or some methods are specially for precipitation. 
 Default is FALSE, refer to details.}
 
-\item{prThreshold}{The minimum value that is considered as a non-zero precipitation. Default to 1 (assuming mm).}
+\item{prThreshold}{The minimum value that is considered as a non-zero precipitation. Default to 0 (assuming mm). If you want 
+to use precipitation biascorrect, you should consider carefully how to set this threshold, usually is 1. But you 
+can try with different numbers to see the results.}
 
 \item{extrapolate}{When use 'eqm' method, and 'no' is set, modified frc is bounded by the range of obs.
 If 'constant' is set, modified frc is not bounded by the range of obs. Default is 'no'.}
