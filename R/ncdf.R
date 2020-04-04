@@ -94,6 +94,7 @@ loadNcdf <- function(filePath, varname, tz = 'GMT', ...) {
   
   # Only deals with the most common dimensions, futher dimensions will be added in future.
   dimIndex <- grepAndMatch(c('lon', 'lat', 'time', 'member'), dimNames)
+  if (length(dimIndex) < 3) dimIndex <- grepAndMatch(c('x', 'y', 'time', 'member'), dimNames)
   if (length(dimIndex) < 3) stop('Your file has less than 3 dimensions.')
   
   # First needs to identify the variable name, load the right data
@@ -338,7 +339,7 @@ downscaleNcdf <- function(gridData, year = NULL, month = NULL, lon = NULL, lat =
 #' 
 #' # Then write to your work directory
 #' 
-#' writeNcdf(nc, 'test.nc')
+#' # 'writeNcdf(nc, 'test.nc')'
 #' 
 #' # More examples can be found in the user manual on https://yuanchao-xu.github.io/hyfo/
 #' 
@@ -449,7 +450,9 @@ getTimeUnit <- function(dates) {
   output <- NULL
   for (unit in units) {
     time <- difftime(dates, dates[1], units = unit)
-    rem <- sapply(time, function(x) x%%1)
+    # previously it worked like below, then new version came
+    # rem <- sapply(time, function(x) x%%1)
+    rem <- as.numeric(time) %% 1
     if (!any(rem != 0)) {
       output <- unit
       break

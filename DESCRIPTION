@@ -1,8 +1,8 @@
 Package: hyfo
 Type: Package
 Title: Hydrology and Climate Forecasting
-Version: 1.4.0
-Date: 2018-9-27
+Version: 1.4.2
+Date: 2020-4-3
 Authors@R: person("Yuanchao", "Xu", email = "xuyuanchao37@gmail.com",
   role = c("aut", "cre"))
 Description: Focuses on data processing and visualization in hydrology and
@@ -22,9 +22,9 @@ LazyData: true
 URL: https://yuanchao-xu.github.io/hyfo/
 BugReports: https://github.com/Yuanchao-Xu/hyfo/issues
 Repository: CRAN
-RoxygenNote: 6.1.0
+RoxygenNote: 7.1.0
 NeedsCompilation: no
-Packaged: 2018-09-27 11:46:34 UTC; User
+Packaged: 2020-04-04 12:02:22 UTC; Yuanchao
 Author: Yuanchao Xu [aut, cre]
 Maintainer: Yuanchao Xu <xuyuanchao37@gmail.com>
-Date/Publication: 2018-09-27 14:40:07 UTC
+Date/Publication: 2020-04-04 12:50:09 UTC
