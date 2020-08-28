@@ -7,11 +7,8 @@
 http://www4.gipuzkoa.net/oohh/web/esp/02.asp
 }
 \usage{
-collectData_txt_anarbe(
-  folderName,
-  output = TRUE,
-  rangeWord = c("Ene       ", -1, "Total     ", -6)
-)
+collectData_txt_anarbe(folderName, output = TRUE,
+  rangeWord = c("Ene       ", -1, "Total     ", -6))
 }
 \arguments{
 \item{folderName}{A string showing the folder path.}
