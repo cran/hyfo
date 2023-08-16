@@ -1,6 +1,6 @@
-9b2cd1752c7a6d3983fd752006cbac83 *DESCRIPTION
-cc8e802005de862f01fa138f8b4c0287 *NAMESPACE
-76e621b65d705a7bc78c8e4ceb3c4619 *NEWS
+d3bb04864f9db874c29c6daa8602907e *DESCRIPTION
+58a46805065899e794f637c44e136763 *NAMESPACE
+e6a2c10b9219d13f467959ecf3937b8c *NEWS
 8422c1e6e0a99f7776a8a6df81049bc4 *R/analyzeTS.R
 0f8ee18350a6ea39733a4272bf7dce81 *R/array_dimension.R
 251bb13d67193a299fd2b337de4fd7ec *R/biasCorrect(generic).R
@@ -17,7 +17,7 @@ c93eda42e7d229efb25836ac5bd2251d *R/extractPeriod(generic).R
 ed553da130c7c9c503b803b2bc10a323 *R/getEnsemble.R
 72c21130fb22ac6968edcd6ed4bafeda *R/getMeanPreci.R
 82516ee72d0ff87e0c0b443b5aa2809b *R/getPreciBar(generic).R
-a168db7e5f04a803eab37daa620f2d77 *R/getSpatialMap.R
+06c6e4770f299cfc80610c2d3dd988f4 *R/getSpatialMap.R
 fb85a66b69c5eedae7a33e2fc65233fd *R/list2dataframe.R
 060543bf5e337fbcc9e02f7af9ea01c2 *R/multi-biasCorrect(generic).R
 21a97f3121b044556159ce555b9e9baf *R/ncdf.R
@@ -31,7 +31,7 @@ a0d9ddae5dbb29a9bcfd8d1603af5fd7 *README.md
 4b02bbe9c4488088b99dd09f5e15ee7d *data/testdl.rda
 8cb83d23735673460fcd4ed16701ddad *data/tgridData.rda
 ecb67be531fb1bff654c933bf3a28f13 *inst/doc/hyfo.Rmd
-c8c803a78b3d7ddd5f9afa77375111e9 *inst/doc/hyfo.pdf
+4aa5345cec44ec5e1c912b5a065f6680 *inst/doc/hyfo.pdf
 a9f3345e0f2dcf291d34de2fe0975d0b *inst/extdata/1999.TXT
 d581b9d1d0b501972cd109a62e525529 *inst/extdata/1999.csv
 b3f9677b08ae2d3f35f39f81b4257c45 *inst/extdata/2000.csv
@@ -72,7 +72,7 @@ f111369ac5ec29e9563577bcb74b79fa *man/getMoment.Rd
 b996c9fded1be5052c9e13674c61f98e *man/getPreciBar_comb.Rd
 1b07d744da358c76419354e15ff68e5f *man/getSpatialMap.Rd
 08a6e57741f3a622d52fb0fb316864e3 *man/getSpatialMap_comb.Rd
-5912dc40eb486a4b604d20e7d123c7fb *man/getSpatialMap_mat.Rd
+5441c0e4feada3605987da2bf0733509 *man/getSpatialMap_mat.Rd
 616e3ecf0521f864c73765151825fb92 *man/list2Dataframe.Rd
 55b42cb5f3251bbb285dc5d9afda2528 *man/loadNcdf.Rd
 a3d06a9006d937c0da621c9b69a9e7be *man/monthlyPreci.Rd
